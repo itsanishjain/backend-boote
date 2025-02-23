@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    /* 🚀 Output Settings */
+    "outDir": "./dist",                    // Compiled files go here
+    "rootDir": "./",  // Changed from ./src since your files are in root
+    "module": "ESNext",  // Changed to ESNext since you're using import/export
+    "target": "ES2020",                     // Modern JS features, compatible with Node.js 14+
+    "moduleResolution": "Node",             // Resolves imports like Node.js
+
+    /* 🎯 Strict Type Safety */
+    "strict": true,                         // Enable all strict type checks
+    "noImplicitAny": true,                  // Disallow implicit "any" types
+    "strictNullChecks": true,               // Prevent null/undefined errors
+    "strictFunctionTypes": true,            // Ensure function parameter types match exactly
+    "strictPropertyInitialization": true,   // Ensure class properties are initialized
+    "noUnusedLocals": true,                 // Warn about unused variables
+    "noUnusedParameters": true,             // Warn about unused function parameters
+    "noFallthroughCasesInSwitch": true,     // Prevent accidental fallthrough in switch cases
+
+    /* 🏎️ Performance Optimizations */
+    "skipLibCheck": true,                   // Speeds up build time by skipping type checks in node_modules
+    "forceConsistentCasingInFileNames": true, // Prevents issues with case-sensitive file systems
+
+    /* 📦 Module Interoperability */
+    "esModuleInterop": true,                // Allows default imports from CommonJS modules
+    "resolveJsonModule": true,              // Enables importing JSON files
+    "allowSyntheticDefaultImports": true,   // Makes import behavior more flexible
+
+    /* 🛠️ Path Aliases (for '@/' shorthand) */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@db/*": ["drizzle/*"]
+    }
+  },
+  "include": [
+    "./**/*.ts"  // Include all TypeScript files
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
