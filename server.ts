@@ -31,6 +31,7 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 app.post("/api/user", async (req: Request, res: Response) => {
+  console.log("User created called");
   try {
     const { user_id } = req.body;
     if (!user_id) {
@@ -39,9 +40,12 @@ app.post("/api/user", async (req: Request, res: Response) => {
       return;
     }
     console.log(user_id);
-    const newUser = await db.insert(users).values({
-      id: user_id,
-    });
+    const newUser = await db
+      .insert(users)
+      .values({
+        id: user_id,
+      })
+      .onConflictDoNothing();
 
     res.status(201).json(newUser);
   } catch (error) {
