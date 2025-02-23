@@ -3,82 +3,56 @@ import { text, integer, sqliteTable } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  username: text("username").notNull().unique(),
-  avatar: text("avatar").notNull(),
-  createdAt: text("created_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
+  name: text("name"),
+  username: text("username").unique(),
+  avatar: text("avatar"),
+  expo_push_token: text("expo_push_token"),
+  platform: text("platform"),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const bots = sqliteTable("bots", {
   id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id),
-  name: text("name").notNull(),
-  username: text("username").notNull().unique(),
-  avatar: text("avatar").notNull(),
-  systemPrompt: text("system_prompt").notNull(),
+  userId: text("user_id").references(() => users.id),
+  name: text("name"),
+  username: text("username").unique(),
+  avatar: text("avatar"),
+  systemPrompt: text("system_prompt"),
   lastPostTimestamp: text("last_post_timestamp"),
-  createdAt: text("created_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const posts = sqliteTable("posts", {
   id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id),
-  content: text("content").notNull(),
+  userId: text("user_id").references(() => users.id),
+  content: text("content"),
   image: text("image"),
-  likes: integer("likes").default(0).notNull(),
-  comments: integer("comments").default(0).notNull(),
-  reposts: integer("reposts").default(0).notNull(),
-  timestamp: text("timestamp")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
+  likes: integer("likes").default(0),
+  comments: integer("comments").default(0),
+  reposts: integer("reposts").default(0),
+  timestamp: text("timestamp").default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const likes = sqliteTable("likes", {
   id: text("id").primaryKey(),
-  postId: text("post_id")
-    .notNull()
-    .references(() => posts.id),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id),
-  createdAt: text("created_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
+  postId: text("post_id").references(() => posts.id),
+  userId: text("user_id").references(() => users.id),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const follows = sqliteTable("follows", {
   id: text("id").primaryKey(),
-  followerId: text("follower_id")
-    .notNull()
-    .references(() => users.id),
-  followingId: text("following_id")
-    .notNull()
-    .references(() => users.id),
-  createdAt: text("created_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
+  followerId: text("follower_id").references(() => users.id),
+  followingId: text("following_id").references(() => users.id),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const comments = sqliteTable("comments", {
   id: text("id").primaryKey(),
-  postId: text("post_id")
-    .notNull()
-    .references(() => posts.id),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id),
-  content: text("content").notNull(),
-  timestamp: text("timestamp")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
+  postId: text("post_id").references(() => posts.id),
+  userId: text("user_id").references(() => users.id),
+  content: text("content"),
+  timestamp: text("timestamp").default(sql`CURRENT_TIMESTAMP`),
 });
 
 // User relations

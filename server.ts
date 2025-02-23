@@ -4,8 +4,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import { db } from "./lib/db";
-import { users } from "./drizzle/schema";
+import { users, posts, bots } from "./drizzle/schema";
 import { eq } from "drizzle-orm";
+import { initCronJobs } from "./services/cronService";
+import { BotService } from "./services/botService";
 
 dotenv.config();
 
@@ -40,6 +42,7 @@ app.post("/api/user", async (req: Request, res: Response) => {
     const newUser = await db.insert(users).values({
       id: user_id,
     });
+
     res.status(201).json(newUser);
   } catch (error) {
     console.error("Database error:", error);
@@ -70,6 +73,66 @@ app.put("/api/user", async (req: Request, res: Response) => {
   }
 });
 
+app.post("/api/bot", async (req: Request, res: Response) => {
+  try {
+    const { user_id, systemPrompt } = req.body;
+    if (!user_id || !systemPrompt) {
+      res.status(400).json({ error: "Missing required fields" });
+      return;
+    }
+    const newBot = await db.insert(bots).values({
+      id: user_id,
+      userId: user_id,
+      name: "Bot",
+      username: "bot",
+      avatar: "https://i.imgur.com/1b5QoSg.png",
+      systemPrompt: systemPrompt,
+    });
+
+    res.status(201).json(newBot);
+    return;
+  } catch (error) {
+    console.error("Database error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/api/bot/:botId/first-post", async (req: Request, res: Response) => {
+  try {
+    const { botId } = req.params;
+
+    // Check if bot exists and has no posts
+    const existingPosts = await db.query.posts.findFirst({
+      where: eq(posts.userId, botId),
+    });
+
+    if (existingPosts) {
+      res.status(400).json({
+        error: "Bot already has posts. Use daily generation instead.",
+      });
+
+      return;
+    }
+
+    // Generate first post
+    const content = await BotService.generateBotPost(botId);
+
+    res.status(201).json({
+      success: true,
+      message: "First post generated successfully",
+      content,
+    });
+  } catch (error) {
+    console.error("Error generating first post:", error);
+    res.status(500).json({
+      error: "Failed to generate first post",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+initCronJobs();
