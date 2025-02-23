@@ -3,75 +3,145 @@ import { text, integer, sqliteTable } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
-  username: text("username").unique(),
-  email: text("email").unique(),
-  last_login: integer("last_login"),
-  is_active: integer("is_active").default(1),
-  expo_push_token: text("expo_push_token"),
-  platform: text("platform"),
-  created_at: integer("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updated_at: integer("updated_at").default(sql`CURRENT_TIMESTAMP`),
+  name: text("name").notNull(),
+  username: text("username").notNull().unique(),
+  avatar: text("avatar").notNull(),
+  createdAt: text("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
 });
 
-export const rooms = sqliteTable("rooms", {
+export const bots = sqliteTable("bots", {
   id: text("id").primaryKey(),
-  name: text("name"),
-  type: text("type"),
-  icon: text("icon"),
-  created_at: integer("created_at"),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  name: text("name").notNull(),
+  username: text("username").notNull().unique(),
+  avatar: text("avatar").notNull(),
+  systemPrompt: text("system_prompt").notNull(),
+  lastPostTimestamp: text("last_post_timestamp"),
+  createdAt: text("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
 });
 
-export const tasks = sqliteTable("tasks", {
+export const posts = sqliteTable("posts", {
   id: text("id").primaryKey(),
-  room_id: text("room_id").references(() => rooms.id, { onDelete: "cascade" }),
-  name: text("name"),
-  frequency_value: integer("frequency_value"),
-  frequency_unit: text("frequency_unit"),
-  effort: integer("effort"),
-  current_state: integer("current_state"),
-  is_completed: integer("is_completed").default(0),
-  last_completed_at: integer("last_completed_at"),
-  created_at: integer("created_at"),
-  points: integer("points").default(0),
-  streak: integer("streak").default(0),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  content: text("content").notNull(),
+  image: text("image"),
+  likes: integer("likes").default(0).notNull(),
+  comments: integer("comments").default(0).notNull(),
+  reposts: integer("reposts").default(0).notNull(),
+  timestamp: text("timestamp")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
 });
 
-export const userStats = sqliteTable("user_stats", {
-  id: text("id").primaryKey().default("default"),
-  current_streak: integer("current_streak").default(0),
-  longest_streak: integer("longest_streak").default(0),
-  total_points: integer("total_points").default(0),
-  last_activity_date: integer("last_activity_date"),
-  tasks_completed: integer("tasks_completed").default(0),
-  early_bird_tasks: integer("early_bird_tasks").default(0),
-  unique_room_types: integer("unique_room_types").default(0),
-  perfect_days: integer("perfect_days").default(0),
-  rooms_created: integer("rooms_created").default(0),
-  tasks_completed_today: integer("tasks_completed_today").default(0),
-  total_scheduled_tasks_today: integer("total_scheduled_tasks_today").default(
-    0
-  ),
-  weekly_completion_rate: integer("weekly_completion_rate").default(0),
-});
-
-export const achievements = sqliteTable("achievements", {
+export const likes = sqliteTable("likes", {
   id: text("id").primaryKey(),
-  unlocked_at: integer("unlocked_at"),
+  postId: text("post_id")
+    .notNull()
+    .references(() => posts.id),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  createdAt: text("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
 });
 
-export const earlyBirdCompletions = sqliteTable("early_bird_completions", {
+export const follows = sqliteTable("follows", {
   id: text("id").primaryKey(),
-  task_id: text("task_id").references(() => tasks.id),
-  completed_at: integer("completed_at"),
+  followerId: text("follower_id")
+    .notNull()
+    .references(() => users.id),
+  followingId: text("following_id")
+    .notNull()
+    .references(() => users.id),
+  createdAt: text("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
 });
 
-export const tasksRelations = relations(tasks, ({ one }) => ({
-  room: one(rooms, {
-    fields: [tasks.room_id],
-    references: [rooms.id],
+export const comments = sqliteTable("comments", {
+  id: text("id").primaryKey(),
+  postId: text("post_id")
+    .notNull()
+    .references(() => posts.id),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  content: text("content").notNull(),
+  timestamp: text("timestamp")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+// User relations
+export const usersRelations = relations(users, ({ many }) => ({
+  posts: many(posts),
+  likes: many(likes),
+  comments: many(comments),
+  bots: many(bots),
+  followedBy: many(follows),
+  following: many(follows),
+}));
+
+// Post relations
+export const postsRelations = relations(posts, ({ one, many }) => ({
+  author: one(users, {
+    fields: [posts.userId],
+    references: [users.id],
+  }),
+  likes: many(likes),
+  comments: many(comments),
+}));
+
+// Bot relations
+export const botsRelations = relations(bots, ({ one, many }) => ({
+  owner: one(users, {
+    fields: [bots.userId],
+    references: [users.id],
+  }),
+  posts: many(posts),
+}));
+
+// Like relations
+export const likesRelations = relations(likes, ({ one }) => ({
+  user: one(users, {
+    fields: [likes.userId],
+    references: [users.id],
+  }),
+  post: one(posts, {
+    fields: [likes.postId],
+    references: [posts.id],
   }),
 }));
 
-export const roomsRelations = relations(rooms, ({ many }) => ({
-  tasks: many(tasks),
+// Comment relations
+export const commentsRelations = relations(comments, ({ one }) => ({
+  user: one(users, {
+    fields: [comments.userId],
+    references: [users.id],
+  }),
+  post: one(posts, {
+    fields: [comments.postId],
+    references: [posts.id],
+  }),
+}));
+
+// Follow relations
+export const followsRelations = relations(follows, ({ one }) => ({
+  follower: one(users, {
+    fields: [follows.followerId],
+    references: [users.id],
+  }),
+  following: one(users, {
+    fields: [follows.followingId],
+    references: [users.id],
+  }),
 }));

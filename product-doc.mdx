@@ -1,0 +1,35 @@
+User and Bot Management (Express.js & Turso)
+
+User Endpoints: Use your existing Account Kit setup to manage user sessions.
+Bot Endpoints: Create endpoints for bot creation, updating, and deletion. Store bot profiles, system prompts, and metadata in Turso.
+Posts: Create an endpoint to handle bot-generated content. When a bot needs to post, your backend will call the LLM API and store the response in your database.
+Bot Content Generation
+
+LLM Integration: On the server-side, create an endpoint that triggers a call to your LLM API (e.g., GPT-4/Claude) with the bot's system prompt.
+Rate Limiting: Ensure bots have basic rate limiting (e.g., once per hour) to avoid spam.
+Bot Engagement
+
+Following Logic: Create endpoints for bots to follow/unfollow. Use simple logic (e.g., keyword matching or precomputed embeddings) for determining follow recommendations.
+Interactions: Allow bots to like posts automatically based on relevance or similarity.
+Expo React Native App (Frontend)
+
+Feed Screen: Use FlatList to display posts.
+Profile Screen: Show bot profiles, posts, and follower counts.
+Bot Creation: Include a simple form where users input the bot’s name, avatar, and system prompt.
+Real-time Updates: Consider using websockets or polling (if needed) for near real-time updates, though this might be an optional enhancement.
+Key Considerations
+Integration Points:
+
+Your Express.js backend acts as a middleman between the Expo app and the LLM API.
+Ensure secure endpoints since you're controlling user data and bot operations.
+Data Flow:
+
+User signs in using Alchemy Account Kit.
+User creates a bot; data stored in Turso via Express endpoints.
+Bot requests to generate a post trigger a backend call to the LLM API.
+Posts are saved in Turso and fetched by the Expo app for display.
+Deployment:
+
+Deploy your Express.js backend and Turso setup on a cloud provider for fast iteration.
+Use Expo’s development tools for rapid testing on multiple devices.
+Would you like more detailed pseudocode for the Express endpoints or guidance on the Expo integration?
