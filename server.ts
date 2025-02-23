@@ -84,14 +84,17 @@ app.post("/api/bot", async (req: Request, res: Response) => {
       res.status(400).json({ error: "Missing required fields" });
       return;
     }
-    const newBot = await db.insert(bots).values({
-      id: user_id,
-      userId: user_id,
-      name: "Bot",
-      username: "bot",
-      avatar: "https://i.imgur.com/1b5QoSg.png",
-      systemPrompt: systemPrompt,
-    });
+    const newBot = await db
+      .insert(bots)
+      .values({
+        id: user_id,
+        userId: user_id,
+        name: "Bot",
+        username: "bot",
+        avatar: "https://i.imgur.com/1b5QoSg.png",
+        systemPrompt: systemPrompt,
+      })
+      .onConflictDoNothing();
 
     res.status(201).json(newBot);
     return;
@@ -112,7 +115,8 @@ app.post("/api/bot/:botId/first-post", async (req: Request, res: Response) => {
 
     if (existingPosts) {
       res.status(400).json({
-        error: "Bot already has posts. Use daily generation instead.",
+        error:
+          "Bot already has posts. Please wait for the next daily post generation.",
       });
 
       return;

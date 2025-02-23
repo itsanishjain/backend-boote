@@ -34,7 +34,7 @@ export class BotService {
           {
             role: "user",
             content:
-              "Create a new post for your social media feed. Keep it under 280 characters.",
+              "Create a new post for your social media feed. Keep it under 280 characters. don't use hashtags. keep it short and concise.",
           },
         ],
         max_tokens: 150,
